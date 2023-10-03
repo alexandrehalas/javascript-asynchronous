@@ -25,25 +25,44 @@ const renderCountry = function (country, className = '') {
   countriesContainer.insertAdjacentHTML('beforeend', html);
 };
 
-const handleError = function (message) {
+const renderError = function (message) {
   countriesContainer.insertAdjacentText('beforeend', message);
 };
 
+const getCountryJSON = function (
+  countryURL,
+  errorMessage = 'Something went wrong!'
+) {
+  return fetch(`${countryURL}`).then(response => {
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${errorMessage}`);
+    }
+    return response.json();
+  });
+};
+
 const getCountry = function (name) {
-  fetch(`https://restcountries.com/v3.1/name/${name}`)
-    .then(promiseResponse => promiseResponse.json())
-    .then(dateResponse => {
-      const country = dateResponse[0];
+  getCountryJSON(
+    `https://restcountries.com/v3.1/name/${name}`,
+    `Country with name '${name}' was not found`
+  )
+    .then(response => {
+      const country = response[0];
       renderCountry(country);
-      const [neighbour] = country.borders;
-      if (!neighbour) return;
-      return fetch(`https://restcountries.com/v3.1/alpha/${neighbour}`);
+      const [neighbour] = country.borders || [];
+      if (!neighbour)
+        throw new Error(
+          `No country neighbour found for country ${country.name.common}`
+        );
+      return getCountryJSON(
+        `https://restcountries.com/v3.1/alpha/${neighbour}`,
+        `Country neighbour with name '${neighbour}' was not found`
+      );
     })
-    .then(promiseResponse => promiseResponse.json())
-    .then(dateResponse => renderCountry(dateResponse[0], 'neighbour'))
+    .then(response => renderCountry(response[0], 'neighbour'))
     .catch(error => {
       console.error(error);
-      handleError(`Something went wrong: ${error.message}. Try again!`);
+      renderError(`${error.message}. Try again!`);
     })
     .finally(() => {
       countriesContainer.style.opacity = 1;
@@ -52,4 +71,6 @@ const getCountry = function (name) {
 
 btn.addEventListener('click', function () {
   getCountry('brazil');
+  // country with no neighbour
+  //getCountry('australia');
 });
