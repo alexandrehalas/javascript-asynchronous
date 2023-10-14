@@ -74,3 +74,30 @@ btn.addEventListener('click', function () {
   // country with no neighbour
   //getCountry('australia');
 });
+
+// THE EVENT LOOP IN PRACTICE
+console.log('first, because is callback queue', 'Test start');
+
+setTimeout(
+  () =>
+    console.log(
+      'fifth, because is a callback of the microtask queue',
+      '0 sec timer'
+    ),
+  0
+);
+Promise.resolve('third, because is microtask queue', 'Resolved promise 1').then(
+  res => console.log(res)
+);
+
+// microtasks has priority over callback, soon if the microtask is to slow the timer
+// of settimeout not will be executed after just 0 seconds, it need wait the microtask first
+Promise.resolve(
+  'fourth, because is microtask queue',
+  'Resolved promise 2'
+).then(res => {
+  for (let i = 0; i < 1000000000; i++) {}
+  console.log(res);
+});
+
+console.log('second, because is callback queue', 'Test end');
