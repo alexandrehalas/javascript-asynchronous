@@ -170,6 +170,7 @@ Promise.resolve('abc').then(res => console.log(res));
 Promise.reject(new Error('abc')).catch(err => console.error(err));
 */
 
+/*
 // PROMISIFYING THE GEOLOCATION API
 
 const getPosition = function () {
@@ -210,3 +211,4 @@ const whereAmI = function () {
 };
 
 btn.addEventListener('click', whereAmI);
+*/
