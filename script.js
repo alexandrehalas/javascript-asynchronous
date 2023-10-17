@@ -227,21 +227,38 @@ const getPosition = function () {
 // async and await is an syntatic sugar over the 'then' method in promises
 // behind of scenes we continue using promises
 const whereAmI = async function () {
-  // Geolocation
-  const position = await getPosition();
-  const { latitude: lat, longitude: lng } = position.coords;
+  try {
+    // Geolocation
+    const position = await getPosition();
+    const { latitude: lat, longitude: lng } = position.coords;
 
-  // Reverse geocoding
-  const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
-  const dataGeo = await resGeo.json();
+    // Reverse geocoding
+    const responseGeo = await fetch(
+      `https://geocode.xyz/${lat},${lng}?geoit=json`
+    );
+    if (!responseGeo.ok) {
+      throw new Error('Problem getting location data');
+    }
 
-  // Country data
-  const response = await fetch(
-    `https://restcountries.com/v3.1/name/${dataGeo.country}`
-  );
-  const data = await response.json();
-  renderCountry(data[0]);
-  countriesContainer.style.opacity = 1;
+    const dataGeo = await responseGeo.json();
+    if (dataGeo.geoCode === 'Throttled! See geocode.xyz/pricing') {
+      throw new Error('Problem getting location data');
+    }
+
+    // Country data
+    const response = await fetch(
+      `https://restcountries.com/v3.1/name/${dataGeo.country}`
+    );
+    if (!response.ok) {
+      throw new Error('Problem getting location data');
+    }
+    const data = await response.json();
+    renderCountry(data[0]);
+  } catch (error) {
+    renderError(`${error.message}. Try again!`);
+  } finally {
+    countriesContainer.style.opacity = 1;
+  }
 };
 whereAmI();
 console.log('FIRST');
