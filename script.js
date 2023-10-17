@@ -253,12 +253,26 @@ const whereAmI = async function () {
       throw new Error('Problem getting location data');
     }
     const data = await response.json();
-    renderCountry(data[0]);
+    const country = data[0];
+    renderCountry(country);
+    countriesContainer.style.opacity = 1;
+    return `You are in ${country.name.common}`;
   } catch (error) {
     renderError(`${error.message}. Try again!`);
-  } finally {
     countriesContainer.style.opacity = 1;
+    throw error;
   }
 };
-whereAmI();
-console.log('FIRST');
+
+// IIFE
+console.log('1: Will get the location');
+(async function () {
+  try {
+    const youAreIn = await whereAmI();
+    console.log(`2: ${youAreIn}`);
+  } catch (error) {
+    console.error(`2: ${error}`);
+  } finally {
+    console.log('3: Finished get the location');
+  }
+})();
