@@ -212,3 +212,36 @@ const whereAmI = function () {
 
 btn.addEventListener('click', whereAmI);
 */
+
+// CONSUMING PROMISES WITH ASYNC/AWAIT
+
+const getPosition = function () {
+  return new Promise(function (resolve, reject) {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+};
+
+// async function is a function basiically keep running in background
+// while performing the code inside of it
+// them when this function is done it automatically returns a promise
+// async and await is an syntatic sugar over the 'then' method in promises
+// behind of scenes we continue using promises
+const whereAmI = async function () {
+  // Geolocation
+  const position = await getPosition();
+  const { latitude: lat, longitude: lng } = position.coords;
+
+  // Reverse geocoding
+  const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+  const dataGeo = await resGeo.json();
+
+  // Country data
+  const response = await fetch(
+    `https://restcountries.com/v3.1/name/${dataGeo.country}`
+  );
+  const data = await response.json();
+  renderCountry(data[0]);
+  countriesContainer.style.opacity = 1;
+};
+whereAmI();
+console.log('FIRST');
